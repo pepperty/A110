@@ -192,7 +192,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
-    # except Exception as e:
-    #     print(f"An error occurred: {e}")
-    #     GPIO.cleanup()
     GPIO.cleanup()
