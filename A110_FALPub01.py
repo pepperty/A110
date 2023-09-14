@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
  '''
- # PJ:XT PYT_BPU_Tank
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
@@ -24,7 +23,6 @@ import json
 
 # Sub process
 import subprocess
-import platform
 
 # Pi IO
 import RPi.GPIO as GPIO
