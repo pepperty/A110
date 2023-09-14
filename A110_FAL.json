@@ -1,0 +1,60 @@
+
+{
+  "gateway": "A110-FIREALARM-FAL B1",
+  "topic": "iot/firealarm",
+  "devices": [
+    {
+      "name": "Room Environment #1",
+      "tags": [
+        {
+          "name": "Room Temperature",
+          "value": "",
+          "value_type": "DOUBLE",
+          "unit": "degC"
+        },
+        {
+          "name": "Room Humidity",
+          "value": "",
+          "value_type": "DOUBLE",
+          "unit": "%"
+        },
+        {
+          "name": "Mode",
+          "value": "",
+          "value_type": "STRING",
+          "unit": ""
+        }
+      ]
+    },
+    {
+      "name": "Firealarm #1",
+      "tags": [
+        {
+          "name": "Volt Battery",
+          "value": "",
+          "value_type": "DOUBLE",
+          "unit": "V"
+        },
+        {
+          "name": "Charge Battery",
+          "value": "",
+          "value_type": "BOOLEAN",
+          "unit": ""
+        },
+        {
+          "name": "Alarm Zone",
+          "value": "",
+          "value_type": "STRING",
+          "unit": ""
+        },
+        {
+          "name": "Failure",
+          "value": "",
+          "value_type": "STRING",
+          "unit": ""
+        }
+      ]
+    }
+  ]
+}
+
