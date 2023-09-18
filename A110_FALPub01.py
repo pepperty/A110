@@ -156,8 +156,7 @@ if __name__ == '__main__':
                 with open(csv_filename, mode="w", newline="") as file:
                     writer = csv.writer(file)
                     ft_raw = ["Timestamp","ping","alarm","trouble"]
-                    for data in ft_raw:
-                        writer.writerow([data])  # Header row
+                    writer.writerow(ft_raw)  # Header row
 
             while connect():
                 time.sleep(1)
@@ -223,8 +222,7 @@ if __name__ == '__main__':
             log_data.append(json_data1['devices'][1]['tags'][3]['value'])
             with open(csv_filename, mode="a", newline="") as file:
                 writer = csv.writer(file)
-                for data in log_data:
-                    writer.writerow([data])
+                writer.writerow(log_data)
         except KeyboardInterrupt:
             print("Measurement stopped by User")
             GPIO.cleanup()
