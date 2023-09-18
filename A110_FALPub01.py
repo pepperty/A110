@@ -1,20 +1,3 @@
-'''
-/*
- * Copyright 2010-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
- '''
-
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 import logging
@@ -24,6 +7,10 @@ import json
 # Sub process
 import subprocess
 import urllib.request
+
+# log
+import csv
+import datetime
 
 # Pi IO
 import RPi.GPIO as GPIO
@@ -140,9 +127,36 @@ if __name__ == '__main__':
                 return True
             except:
                 return False
-        
-        while connect():
+        # Function to log the current timestamp
+        def log_timestamp():
+            current_time = datetime.datetime.now()
+            return current_time.strftime("%Y-%m-%d %H:%M:%S")
+        # Create a list to store log data
+        log_data = []
 
+        # Generate log data (you can do this whenever you want to log data)
+        log_data.append(log_timestamp())
+
+        # CSV filename
+        csv_filename = "timestamps.csv"
+
+        # Check if the file already exists
+        file_exists = True
+        try:
+            with open(csv_filename, "r") as file:
+                reader = csv.reader(file)
+                if not list(reader):
+                    file_exists = False
+        except FileNotFoundError:
+            file_exists = False
+
+        # If the file doesn't exist, create it with a header row
+        if not file_exists:
+            with open(csv_filename, mode="w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["Timestamp"])  # Header row
+
+        while connect():
             time.sleep(1)
             temperature = get_cpu_temperature()-15
             if temperature is not None:
@@ -200,6 +214,14 @@ if __name__ == '__main__':
                 #     print('Published topic %s: %s\n' % (topic, messageJson1))
         # Reset by pressing CTRL + C
         time.sleep(30)
+        # Append log data to the CSV file
+        log_data.append(connect())
+        log_data.append(json_data1['devices'][1]['tags'][2]['value'])
+        log_data.append(json_data1['devices'][1]['tags'][3]['value'])
+        with open(csv_filename, mode="a", newline="") as file:
+            writer = csv.writer(file)
+            for data in log_data:
+                writer.writerow([data])
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
