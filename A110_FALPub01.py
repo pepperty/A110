@@ -154,7 +154,9 @@ if __name__ == '__main__':
         if not file_exists:
             with open(csv_filename, mode="w", newline="") as file:
                 writer = csv.writer(file)
-                writer.writerow(["Timestamp"])  # Header row
+                ft_raw = ["Timestamp","ping","alarm","trouble"]
+                for data in ft_raw:
+                writer.writerow([data])  # Header row
 
         while connect():
             time.sleep(1)
