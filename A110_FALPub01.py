@@ -156,7 +156,7 @@ if __name__ == '__main__':
                 writer = csv.writer(file)
                 ft_raw = ["Timestamp","ping","alarm","trouble"]
                 for data in ft_raw:
-                writer.writerow([data])  # Header row
+                    writer.writerow([data])  # Header row
 
         while connect():
             time.sleep(1)
