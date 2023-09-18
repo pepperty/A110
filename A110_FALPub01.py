@@ -119,112 +119,115 @@ with open('/home/DEV01/A110/A110_FAL.json', 'r') as file:
     json_data1 = json.load(file)
 # print(json_data)
 if __name__ == '__main__':
-    try:
-        Alarm = 0
-        def connect(host='http://google.com'):
-            try:
-                urllib.request.urlopen(host) #Python 3.x
-                return True
-            except:
-                return False
-        # Function to log the current timestamp
-        def log_timestamp():
-            current_time = datetime.datetime.now()
-            return current_time.strftime("%Y-%m-%d %H:%M:%S")
-        # Create a list to store log data
-        log_data = []
-
-        # Generate log data (you can do this whenever you want to log data)
-        log_data.append(log_timestamp())
-
-        # CSV filename
-        csv_filename = "timestamps.csv"
-
-        # Check if the file already exists
-        file_exists = True
+    while True:
         try:
-            with open(csv_filename, "r") as file:
-                reader = csv.reader(file)
-                if not list(reader):
-                    file_exists = False
-        except FileNotFoundError:
-            file_exists = False
+            Alarm = 0
+            def connect(host='http://google.com'):
+                try:
+                    urllib.request.urlopen(host) #Python 3.x
+                    return True
+                except:
+                    return False
+            # Function to log the current timestamp
+            def log_timestamp():
+                current_time = datetime.datetime.now()
+                return current_time.strftime("%Y-%m-%d %H:%M:%S")
+            # Create a list to store log data
+            log_data = []
 
-        # If the file doesn't exist, create it with a header row
-        if not file_exists:
-            with open(csv_filename, mode="w", newline="") as file:
-                writer = csv.writer(file)
-                ft_raw = ["Timestamp","ping","alarm","trouble"]
-                for data in ft_raw:
-                    writer.writerow([data])  # Header row
+            # Generate log data (you can do this whenever you want to log data)
+            log_data.append(log_timestamp())
 
-        while connect():
-            time.sleep(1)
-            temperature = get_cpu_temperature()-15
-            if temperature is not None:
-                #print(f"CPU Temperature: {temperature}°C")
-                json_data1['devices'][0]['tags'][0]['value']= round(temperature,2)
-            else:
-                #print("Failed to read CPU temperature.")
-                json_data1['devices'][0]['tags'][0]['value']=""
+            # CSV filename
+            csv_filename = "timestamps.csv"
 
-            if mode == 'both' or mode == 'publish':
-                # print("################")
-                # print(json_data1['devices'][0]['tags'][2])
-                # print("################")
-                trMill = int(time.time())
-                if GPIO.input(IO_05_AL) == 0 and Alarm != 2:
-                    Alarm = 1
-                    json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
+            # Check if the file already exists
+            file_exists = True
+            try:
+                with open(csv_filename, "r") as file:
+                    reader = csv.reader(file)
+                    if not list(reader):
+                        file_exists = False
+            except FileNotFoundError:
+                file_exists = False
+
+            # If the file doesn't exist, create it with a header row
+            if not file_exists:
+                with open(csv_filename, mode="w", newline="") as file:
+                    writer = csv.writer(file)
+                    ft_raw = ["Timestamp","ping","alarm","trouble"]
+                    for data in ft_raw:
+                        writer.writerow([data])  # Header row
+
+            while connect():
+                time.sleep(1)
+                temperature = get_cpu_temperature()-15
+                if temperature is not None:
+                    #print(f"CPU Temperature: {temperature}°C")
+                    json_data1['devices'][0]['tags'][0]['value']= round(temperature,2)
                 else:
-                    json_data1['devices'][1]['tags'][2]['value']=""
-                if GPIO.input(IO_13_TB) == 0:
-                    json_data1['devices'][1]['tags'][3]['value']="Trouble"
-                else:
-                    json_data1['devices'][1]['tags'][3]['value']=""
+                    #print("Failed to read CPU temperature.")
+                    json_data1['devices'][0]['tags'][0]['value']=""
 
-                if Alarm == 1:
-                    Alarm = 2
-                    messageJson1 = json.dumps(json_data1)
-                    myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                    print('Published topic %s: %s\n' % (topic, messageJson1))
-                    print("11111111111111111111111111")
-                    tlMill = int(time.time())
-                    time.sleep(25)
-                if (trMill-tlMill)>30:
-                    if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
-                        json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY_Restore"
+                if mode == 'both' or mode == 'publish':
+                    # print("################")
+                    # print(json_data1['devices'][0]['tags'][2])
+                    # print("################")
+                    trMill = int(time.time())
+                    if GPIO.input(IO_05_AL) == 0 and Alarm != 2:
+                        Alarm = 1
+                        json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
+                    else:
+                        json_data1['devices'][1]['tags'][2]['value']=""
+                    if GPIO.input(IO_13_TB) == 0:
+                        json_data1['devices'][1]['tags'][3]['value']="Trouble"
+                    else:
+                        json_data1['devices'][1]['tags'][3]['value']=""
+
+                    if Alarm == 1:
+                        Alarm = 2
                         messageJson1 = json.dumps(json_data1)
                         myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
                         print('Published topic %s: %s\n' % (topic, messageJson1))
-                        print("22222222222222222222222")
-                        time.sleep(5)
+                        print("11111111111111111111111111")
                         tlMill = int(time.time())
-                        json_data1['devices'][1]['tags'][2]['value']=""
                         time.sleep(25)
-                    else:
-                        if GPIO.input(IO_05_AL) == 0:
-                            json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
-                        else:
+                    if (trMill-tlMill)>30:
+                        if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
+                            json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY_Restore"
+                            messageJson1 = json.dumps(json_data1)
+                            myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
+                            print('Published topic %s: %s\n' % (topic, messageJson1))
+                            print("22222222222222222222222")
+                            time.sleep(5)
+                            tlMill = int(time.time())
                             json_data1['devices'][1]['tags'][2]['value']=""
-                        messageJson1 = json.dumps(json_data1)
-                        myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                        print("0000000000000000000000000")
-                        tlMill = int(time.time())
+                            time.sleep(25)
+                        else:
+                            if GPIO.input(IO_05_AL) == 0:
+                                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
+                            else:
+                                json_data1['devices'][1]['tags'][2]['value']=""
+                            messageJson1 = json.dumps(json_data1)
+                            myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
+                            print("0000000000000000000000000")
+                            tlMill = int(time.time())
 
-                # if mode == 'publish':
-                #     print('Published topic %s: %s\n' % (topic, messageJson1))
-        # Reset by pressing CTRL + C
-        time.sleep(30)
-        # Append log data to the CSV file
-        log_data.append(connect())
-        log_data.append(json_data1['devices'][1]['tags'][2]['value'])
-        log_data.append(json_data1['devices'][1]['tags'][3]['value'])
-        with open(csv_filename, mode="a", newline="") as file:
-            writer = csv.writer(file)
-            for data in log_data:
-                writer.writerow([data])
-    except KeyboardInterrupt:
-        print("Measurement stopped by User")
-        GPIO.cleanup()
-    GPIO.cleanup()
+                    # if mode == 'publish':
+                    #     print('Published topic %s: %s\n' % (topic, messageJson1))
+            # Reset by pressing CTRL + C
+            time.sleep(30)
+            # Append log data to the CSV file
+            log_data.append(connect())
+            log_data.append(json_data1['devices'][1]['tags'][2]['value'])
+            log_data.append(json_data1['devices'][1]['tags'][3]['value'])
+            with open(csv_filename, mode="a", newline="") as file:
+                writer = csv.writer(file)
+                for data in log_data:
+                    writer.writerow([data])
+        except KeyboardInterrupt:
+            print("Measurement stopped by User")
+            GPIO.cleanup()
+        except Exception as e:
+            print(f"An exception occurred: {str(e)}")
+            pass
