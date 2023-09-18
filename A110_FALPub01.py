@@ -23,6 +23,7 @@ import json
 
 # Sub process
 import subprocess
+import urllib.request
 
 # Pi IO
 import RPi.GPIO as GPIO
@@ -133,7 +134,15 @@ with open('/home/DEV01/A110/A110_FAL.json', 'r') as file:
 if __name__ == '__main__':
     try:
         Alarm = 0
-        while True:
+        def connect(host='http://google.com'):
+            try:
+                urllib.request.urlopen(host) #Python 3.x
+                return True
+            except:
+                return False
+        
+        while connect():
+
             time.sleep(1)
             temperature = get_cpu_temperature()-15
             if temperature is not None:
@@ -190,6 +199,7 @@ if __name__ == '__main__':
                 # if mode == 'publish':
                 #     print('Published topic %s: %s\n' % (topic, messageJson1))
         # Reset by pressing CTRL + C
+        time.sleep(30)
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
