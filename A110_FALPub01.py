@@ -184,28 +184,35 @@ if __name__ == '__main__':
                         json_data1['devices'][1]['tags'][3]['value']=""
 
                     if Alarm == 1:
-                        Alarm = 2
-                        messageJson1 = json.dumps(json_data1)
-                        myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                        print('Published topic %s: %s\n' % (topic, messageJson1))
-                        print("11111111111111111111111111")
-                        tlMill = int(time.time())
-                        time.sleep(25)
-                    if (trMill-tlMill)>30:
-                        if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
-                            Alarm = 0
-                            json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY_Restore"
+                        time.sleep(1)
+                        if Alarm == 1:
+                            Alarm = 2
                             messageJson1 = json.dumps(json_data1)
                             myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
                             print('Published topic %s: %s\n' % (topic, messageJson1))
-                            print("22222222222222222222222")
+                            print("11111111111111111111111111")
                             tlMill = int(time.time())
-                            json_data1['devices'][1]['tags'][2]['value']=""
                             time.sleep(25)
+                        elif GPIO.input(IO_05_AL) == 0:
+                            Alarm = 0
+                    if (trMill-tlMill)>30:
+                        if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
+                            time.sleep(1)
+                            if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
+                                Alarm = 0
+                                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY_Restore"
+                                messageJson1 = json.dumps(json_data1)
+                                myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
+                                print('Published topic %s: %s\n' % (topic, messageJson1))
+                                print("22222222222222222222222")
+                                tlMill = int(time.time())
+                                json_data1['devices'][1]['tags'][2]['value']=""
+                                time.sleep(25)
                         else:
                             if GPIO.input(IO_05_AL) == 0:
                                 json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
                             else:
+                                Alarm = 0
                                 json_data1['devices'][1]['tags'][2]['value']=""
                             messageJson1 = json.dumps(json_data1)
                             myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
