@@ -1,6 +1,6 @@
 
 {
-  "gateway": "A110-FIREALARM-FAL B1",
+  "gateway": "VTGM-FIREALARM-FAL B1",
   "topic": "iot/firealarm",
   "devices": [
     {

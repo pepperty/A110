@@ -11,27 +11,36 @@ import urllib.request
 # log
 import csv
 import datetime
+from sys import platform
 
-# Pi IO
-import RPi.GPIO as GPIO
-# Define GPIO to use on Pi
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-IO_05_AL = 13 
-IO_13_TB = 5
+# MSteam
+import pymsteams
+myTeamsMessage = pymsteams.connectorcard("https://sansirimail.webhook.office.com/webhookb2/c0b64c0c-8a5c-4061-831a-661626c3166a@875bdd0a-688b-41d2-96b7-454d280043aa/IncomingWebhook/47afcadebbec4e499c52a9a7eadee573/13125d96-3d9c-4fc4-81f7-59eeaa397b8d")
+
+if platform == "Windows":
+    print("Windows")
+
+if platform == "Linux":
+    # Pi IO
+    import RPi.GPIO as GPIO
+    # Define GPIO to use on Pi
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    IO_05_AL = 13 
+    IO_13_TB = 5
+
+    GPIO.setup(IO_05_AL, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(IO_13_TB, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 trMill = int(time.time())
 tlMill = int(time.time())
 
-GPIO.setup(IO_05_AL, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(IO_13_TB, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
 # Stop Node-RED
-# if platform.system() == "Windows":
+# if platform == "Windows":
 #     node_red_path = r'C:\Users\peppe\AppData\Roaming\npm\node-red.cmd'
 #     subprocess.call(['taskkill', '/F', '/IM', 'node-red'])
 #     subprocess.Popen([node_red_path])
-# if platform.system() == "Linux":
+# if platform == "Linux":
 #     subprocess.call(['killall', 'node-red'])
 #     subprocess.Popen(['node-red'])
 
@@ -50,10 +59,15 @@ def customCallback(client, userdata, message):
 # certificatePath = "certs/device.pem.crt"
 # privateKeyPath = "certs/private.pem.key"
 
+# host = "a1x0dm3q26289z-ats.iot.ap-southeast-1.amazonaws.com"
+# rootCAPath = "/home/DEV01/A110/certsP/AmazonRootCA1.pem"
+# certificatePath = "/home/DEV01/A110/certsP/device.pem.crt"
+# privateKeyPath = "/home/DEV01/A110/certsP/private.pem.key"
+
 host = "a1x0dm3q26289z-ats.iot.ap-southeast-1.amazonaws.com"
-rootCAPath = "/home/DEV01/A110/certsP/AmazonRootCA1.pem"
-certificatePath = "/home/DEV01/A110/certsP/device.pem.crt"
-privateKeyPath = "/home/DEV01/A110/certsP/private.pem.key"
+rootCAPath = "certsP/AmazonRootCA1.pem"
+certificatePath = "certsP/device.pem.crt"
+privateKeyPath = "certsP/private.pem.key"
 
 port = 8883
 useWebsocket = False
@@ -115,9 +129,9 @@ def get_cpu_temperature():
 
 # Publish to the same topic in a loop forever
 # Read data from JSON file
-with open('/home/DEV01/A110/A110_FAL.json', 'r') as file:
+with open('VTGM_FAL.json', 'r') as file:
     json_data1 = json.load(file)
-# print(json_data)
+
 if __name__ == '__main__':
     while True:
         try:
@@ -160,79 +174,40 @@ if __name__ == '__main__':
 
             while connect():
                 time.sleep(1)
-                temperature = get_cpu_temperature()-15
-                if temperature is not None:
-                    #print(f"CPU Temperature: {temperature}°C")
-                    json_data1['devices'][0]['tags'][0]['value']= round(temperature,2)
-                else:
-                    #print("Failed to read CPU temperature.")
-                    json_data1['devices'][0]['tags'][0]['value']=""
+                
+                json_data1['devices'][0]['tags'][0]['value']= 15
+                
+                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_TB"
+                messageJson1 = json.dumps(json_data1)
+                myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
+                print('Published topic %s: %s\n' % (topic, messageJson1))
 
-                if mode == 'both' or mode == 'publish':
-                    # print("################")
-                    # print(json_data1['devices'][0]['tags'][2])
-                    # print("################")
-                    trMill = int(time.time())
-                    if GPIO.input(IO_05_AL) == 0 and Alarm != 2:
-                        Alarm = 1
-                        json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
-                    else:
-                        json_data1['devices'][1]['tags'][2]['value']=""
-                    if GPIO.input(IO_13_TB) == 0:
-                        json_data1['devices'][1]['tags'][3]['value']="Trouble"
-                    else:
-                        json_data1['devices'][1]['tags'][3]['value']=""
+                time.sleep(30)
+                
+                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_TB"
+                messageJson1 = json.dumps(json_data1)
+                myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
+                print('Published topic %s: %s\n' % (topic, messageJson1))
 
-                    if Alarm == 1:
-                        time.sleep(1)
-                        if Alarm == 1:
-                            Alarm = 2
-                            messageJson1 = json.dumps(json_data1)
-                            myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                            print('Published topic %s: %s\n' % (topic, messageJson1))
-                            print("11111111111111111111111111")
-                            tlMill = int(time.time())
-                            time.sleep(25)
-                        elif GPIO.input(IO_05_AL) == 0:
-                            Alarm = 0
-                    if (trMill-tlMill)>30:
-                        if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
-                            time.sleep(1)
-                            if Alarm == 2 and GPIO.input(IO_05_AL) != 0:
-                                Alarm = 0
-                                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY_Restore"
-                                messageJson1 = json.dumps(json_data1)
-                                myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                                print('Published topic %s: %s\n' % (topic, messageJson1))
-                                print("22222222222222222222222")
-                                tlMill = int(time.time())
-                                json_data1['devices'][1]['tags'][2]['value']=""
-                                time.sleep(25)
-                        else:
-                            if GPIO.input(IO_05_AL) == 0:
-                                json_data1['devices'][1]['tags'][2]['value']="Z1_DZ_1_FL1_LOBBY"
-                            else:
-                                Alarm = 0
-                                json_data1['devices'][1]['tags'][2]['value']=""
-                            messageJson1 = json.dumps(json_data1)
-                            myAWSIoTMQTTClient.publish(topic, messageJson1, 0)
-                            print("0000000000000000000000000")
-                            tlMill = int(time.time())
-
+                #DATA to Msteam
+                myTeamsMessage.text("ALERT "+json_data1['gateway'])
+                myTeamsMessage.send()
+                
+                time.sleep(30)
                     # if mode == 'publish':
                     #     print('Published topic %s: %s\n' % (topic, messageJson1))
             # Reset by pressing CTRL + C
             time.sleep(30)
             # Append log data to the CSV file
-            log_data.append(connect())
-            log_data.append(json_data1['devices'][1]['tags'][2]['value'])
-            log_data.append(json_data1['devices'][1]['tags'][3]['value'])
-            with open(csv_filename, mode="a", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(log_data)
+            # log_data.append(connect())
+            # log_data.append(json_data1['devices'][1]['tags'][2]['value'])
+            # log_data.append(json_data1['devices'][1]['tags'][3]['value'])
+            # with open(csv_filename, mode="a", newline="") as file:
+            #     writer = csv.writer(file)
+            #     writer.writerow(log_data)
         except KeyboardInterrupt:
             print("Measurement stopped by User")
-            GPIO.cleanup()
+            # GPIO.cleanup()
         except Exception as e:
             print(f"An exception occurred: {str(e)}")
             pass
